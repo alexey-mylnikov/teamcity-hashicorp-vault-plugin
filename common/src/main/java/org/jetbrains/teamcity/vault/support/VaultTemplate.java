@@ -71,7 +71,7 @@ public class VaultTemplate {
         this.sessionManager = sessionManager;
 
         this.sessionTemplate = createSessionTemplate(vaultEndpoint, clientHttpRequestFactory);
-        this.plainTemplate = UtilKt.createRestTemplate(vaultEndpoint, clientHttpRequestFactory);
+        this.plainTemplate = UtilKt.createRetryRestTemplate(vaultEndpoint, clientHttpRequestFactory);
     }
 
     private VaultTemplate(@NotNull VaultTemplate origin, @NotNull final String wrapTTL) {
@@ -90,7 +90,7 @@ public class VaultTemplate {
     private RestTemplate createSessionTemplate(VaultEndpoint endpoint,
                                                ClientHttpRequestFactory requestFactory) {
 
-        RestTemplate restTemplate = UtilKt.createRestTemplate(endpoint, requestFactory);
+        RestTemplate restTemplate = UtilKt.createRetryRestTemplate(endpoint, requestFactory);
 
         restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
 

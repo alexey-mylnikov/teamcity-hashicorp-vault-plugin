@@ -21,16 +21,19 @@ import jetbrains.buildServer.util.VersionComparatorUtil
 import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider
 import org.jetbrains.teamcity.vault.support.ClientHttpRequestFactoryFactory
 import org.jetbrains.teamcity.vault.support.MappingJackson2HttpMessageConverter
+import org.jetbrains.teamcity.vault.support.RetryRestTemplate
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.retry.backoff.FixedBackOffPolicy
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.vault.client.VaultClients
 import org.springframework.vault.client.VaultEndpoint
 import org.springframework.vault.client.VaultHttpHeaders
 import org.springframework.vault.support.ClientOptions
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.DefaultUriTemplateHandler
 import java.net.URI
 
@@ -59,16 +62,20 @@ fun createClientHttpRequestFactory(trustStoreProvider: SSLTrustStoreProvider): C
     return ClientHttpRequestFactoryFactory.create(ClientOptions(), trustStoreProvider)
 }
 
-fun createRestTemplate(settings: VaultFeatureSettings, trustStoreProvider: SSLTrustStoreProvider): RestTemplate {
+fun createRetryRestTemplate(settings: VaultFeatureSettings, trustStoreProvider: SSLTrustStoreProvider): RetryRestTemplate {
     val endpoint = VaultEndpoint.from(URI.create(settings.url))!!
     val factory = createClientHttpRequestFactory(trustStoreProvider)
     // HttpComponents.usingHttpComponents(options, sslConfiguration)
 
-    return createRestTemplate(endpoint, factory)
+    // TODO: get backoff and attempts from settings
+    val retry = createRetryTemplate(backoff = 1000L, attempts = 5)
+    val template = createRetryRestTemplate(endpoint, factory)
+    template.setRetryTemplate(retry)
+    return template
 }
 
-fun createRestTemplate(endpoint: VaultEndpoint, factory: ClientHttpRequestFactory): RestTemplate {
-    val template = createRestTemplate()
+fun createRetryRestTemplate(endpoint: VaultEndpoint, factory: ClientHttpRequestFactory): RetryRestTemplate {
+    val template = createRetryRestTemplate()
 
     template.requestFactory = factory
     template.uriTemplateHandler = createUriTemplateHandler(endpoint)
@@ -76,7 +83,7 @@ fun createRestTemplate(endpoint: VaultEndpoint, factory: ClientHttpRequestFactor
     return template
 }
 
-fun RestTemplate.withVaultToken(token: String): RestTemplate {
+fun RetryRestTemplate.withVaultToken(token: String): RetryRestTemplate {
     this.interceptors.add(ClientHttpRequestInterceptor { request, body, execution ->
         request.headers.add(VaultHttpHeaders.VAULT_TOKEN, token)
         execution.execute(request, body)
@@ -84,8 +91,7 @@ fun RestTemplate.withVaultToken(token: String): RestTemplate {
     return this
 }
 
-
-private fun createRestTemplate(): RestTemplate {
+private fun createRetryRestTemplate(): RetryRestTemplate {
     // Like in org.springframework.vault.client.VaultClients.createRestTemplate()
     // However custom Jackson2 converter is used
     val converters = listOf<HttpMessageConverter<*>>(
@@ -93,7 +99,21 @@ private fun createRestTemplate(): RestTemplate {
             StringHttpMessageConverter(),
             MappingJackson2HttpMessageConverter()
     )
-    return RestTemplate(converters)
+    return RetryRestTemplate(converters)
+}
+
+private fun createRetryTemplate(backoff: Long, attempts: Int): RetryTemplate {
+    val template = RetryTemplate()
+
+    val backoffPolicy = FixedBackOffPolicy()
+    backoffPolicy.backOffPeriod = backoff
+    template.setBackOffPolicy(backoffPolicy)
+
+    val retryPolicy = SimpleRetryPolicy()
+    retryPolicy.maxAttempts = attempts
+    template.setRetryPolicy(retryPolicy)
+
+    return template
 }
 
 fun isShouldSetEnvParameters(parameters: MutableMap<String, String>, namespace: String): Boolean {

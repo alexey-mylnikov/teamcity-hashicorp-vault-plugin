@@ -93,7 +93,7 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
                             .wrapped()
                             .initialToken(VaultToken.of(wrapped))
                             .build()
-                    val template = createRestTemplate(settings, trustStoreProvider)
+                    val template = createRetryRestTemplate(settings, trustStoreProvider)
                     val authentication = CubbyholeAuthentication(options, template)
 
                     val timeout = (parameters[getVaultParameterName(namespace, VaultConstants.TOKEN_REFRESH_TIMEOUT_PROPERTY_SUFFIX)]

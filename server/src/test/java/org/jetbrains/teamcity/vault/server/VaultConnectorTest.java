@@ -111,7 +111,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RestTemplate simpleTemplate = UtilKt.createRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", false), SSL_TRUST_STORE_PROVIDER);
+        final RestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", false), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 
@@ -158,7 +158,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RestTemplate simpleTemplate = UtilKt.createRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", true), SSL_TRUST_STORE_PROVIDER);
+        final RestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", true), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 

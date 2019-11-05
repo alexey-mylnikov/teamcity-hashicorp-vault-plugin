@@ -67,7 +67,7 @@ class VaultConnector(dispatcher: EventDispatcher<BuildServerListener>, private v
         @JvmStatic fun revoke(info: LeasedWrappedTokenInfo, trustStoreProvider: SSLTrustStoreProvider): Boolean {
             val settings = info.connection
             try {
-                val template = createRestTemplate(settings, trustStoreProvider)
+                val template = createRetryRestTemplate(settings, trustStoreProvider)
                 // Login and retrieve server token
                 val (token, accessor) = getRealToken(template, settings)
 
@@ -90,7 +90,7 @@ class VaultConnector(dispatcher: EventDispatcher<BuildServerListener>, private v
         fun revoke(info: LeasedTokenInfo, trustStoreProvider: SSLTrustStoreProvider): Boolean {
             val settings = info.connection
             try {
-                val template = createRestTemplate(settings, trustStoreProvider)
+                val template = createRetryRestTemplate(settings, trustStoreProvider)
                 // Login and retrieve server token
                 template.withVaultToken(info.token)
                 // Revoke token by accessor
