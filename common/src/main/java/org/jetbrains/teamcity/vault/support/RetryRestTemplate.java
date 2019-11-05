@@ -30,7 +30,7 @@ import java.util.Map;
 
 public class RetryRestTemplate extends RestTemplate implements RestOperations {
 
-    private RetryTemplate retryTemplate;
+    private RetryTemplate retryTemplate = new RetryTemplate();
 
     public RetryRestTemplate(List<HttpMessageConverter<?>> messageConverters) {}
 
@@ -38,6 +38,7 @@ public class RetryRestTemplate extends RestTemplate implements RestOperations {
     public <T> T execute(final String url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor, final Map<String, ?> urlVariables) throws RestClientException {
 
+        RetryTemplate retryTemplate = getRetryTemplate();
         return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
@@ -50,6 +51,7 @@ public class RetryRestTemplate extends RestTemplate implements RestOperations {
     public <T> T execute(final URI url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor) throws RestClientException {
 
+        RetryTemplate retryTemplate = getRetryTemplate();
         return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
@@ -62,6 +64,7 @@ public class RetryRestTemplate extends RestTemplate implements RestOperations {
     public <T> T execute(final String url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor, final Object... urlVariables) throws RestClientException {
 
+        RetryTemplate retryTemplate = getRetryTemplate();
         return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
@@ -70,7 +73,11 @@ public class RetryRestTemplate extends RestTemplate implements RestOperations {
         });
     }
 
-    public void setRetryTemplate(final RetryTemplate retryTemplate) {
+    public void setRetryTemplate(RetryTemplate retryTemplate) {
         this.retryTemplate = retryTemplate;
+    }
+
+    private RetryTemplate getRetryTemplate() {
+        return this.retryTemplate;
     }
 }
