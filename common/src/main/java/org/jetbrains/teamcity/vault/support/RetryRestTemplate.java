@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class RetryRestTemplate extends RestTemplate implements RestOperations {
+public class RetryRestTemplate extends RestTemplate {
 
     private RetryTemplate retryTemplate = new RetryTemplate();
 

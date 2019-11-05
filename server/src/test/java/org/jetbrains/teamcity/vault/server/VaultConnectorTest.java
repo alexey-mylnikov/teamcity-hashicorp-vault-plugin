@@ -27,6 +27,7 @@ import org.jetbrains.teamcity.vault.VaultDevContainer;
 import org.jetbrains.teamcity.vault.VaultDevEnvironment;
 import org.jetbrains.teamcity.vault.VaultFeatureSettings;
 import org.jetbrains.teamcity.vault.support.LifecycleAwareSessionManager;
+import org.jetbrains.teamcity.vault.support.RetryRestTemplate;
 import org.jetbrains.teamcity.vault.support.VaultTemplate;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -40,7 +41,6 @@ import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,7 +111,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", false), SSL_TRUST_STORE_PROVIDER);
+        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", false), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 
@@ -158,7 +158,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", true), SSL_TRUST_STORE_PROVIDER);
+        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", true), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 
