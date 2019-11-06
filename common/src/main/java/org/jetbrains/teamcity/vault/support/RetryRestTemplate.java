@@ -32,7 +32,9 @@ public class RetryRestTemplate extends RestTemplate {
 
     private RetryTemplate retryTemplate = new RetryTemplate();
 
-    public RetryRestTemplate(List<HttpMessageConverter<?>> messageConverters) {}
+    public RetryRestTemplate(List<HttpMessageConverter<?>> messageConverters) {
+        super(messageConverters);
+    }
 
     @Override
     public <T> T execute(final String url, final HttpMethod method, final RequestCallback requestCallback,
