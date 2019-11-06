@@ -76,15 +76,15 @@ public class VaultConnectorTest {
 
     @Test
     public void testWrappedTokenCreated() throws Exception {
-        doTestWrapperTokenCreated("approle");
+        doTestWrapperTokenCreated("approle", 0L, 1);
     }
 
     @Test
     public void testWrappedTokenCreatedNonStandardAuthPath() throws Exception {
-        doTestWrapperTokenCreated("teamcity/auth");
+        doTestWrapperTokenCreated("teamcity/auth", 0L, 1);
     }
 
-    private void doTestWrapperTokenCreated(String authMountPath) {
+    private void doTestWrapperTokenCreated(String authMountPath, long backoffPeriod, int maxAttempts) {
         final ClientHttpRequestFactory factory = createClientHttpRequestFactory(SSL_TRUST_STORE_PROVIDER);
         final VaultTemplate template = getVault().getTemplate(factory);
 
@@ -101,7 +101,7 @@ public class VaultConnectorTest {
         Pair<String, String> credentials = getAppRoleCredentials(template, "auth/" + authMountPath + "/role/testrole");
 
 
-        final Pair<String, String> wrapped = VaultConnector.doRequestWrappedToken(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, credentials.getFirst(), credentials.getSecond(), false), SSL_TRUST_STORE_PROVIDER);
+        final Pair<String, String> wrapped = VaultConnector.doRequestWrappedToken(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, credentials.getFirst(), credentials.getSecond(), 0L, 1, false), SSL_TRUST_STORE_PROVIDER);
 
         then(wrapped.getFirst()).isNotNull();
         then(wrapped.getSecond()).isNotNull();
@@ -111,7 +111,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", false), SSL_TRUST_STORE_PROVIDER);
+        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("vault", getVault().getUrl(), authMountPath, "", "", 0L, 1, false), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 
@@ -148,7 +148,7 @@ public class VaultConnectorTest {
         Pair<String, String> credentials = getAppRoleCredentials(template, "auth/" + authMountPath + "/role/testrole");
 
 
-        final Pair<String, String> wrapped = VaultConnector.doRequestWrappedToken(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, credentials.getFirst(), credentials.getSecond(), true), SSL_TRUST_STORE_PROVIDER);
+        final Pair<String, String> wrapped = VaultConnector.doRequestWrappedToken(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, credentials.getFirst(), credentials.getSecond(), 0L, 1, true), SSL_TRUST_STORE_PROVIDER);
 
         then(wrapped.getFirst()).isNotNull();
         then(wrapped.getSecond()).isNotNull();
@@ -158,7 +158,7 @@ public class VaultConnectorTest {
                 .wrapped()
                 .initialToken(VaultToken.of(wrapped.getFirst()))
                 .build();
-        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", true), SSL_TRUST_STORE_PROVIDER);
+        final RetryRestTemplate simpleTemplate = UtilKt.createRetryRestTemplate(new VaultFeatureSettings("", getVault().getUrl(), authMountPath, "", "", 0L, 1, true), SSL_TRUST_STORE_PROVIDER);
         final CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, simpleTemplate);
         final TaskScheduler scheduler = new ConcurrentTaskScheduler();
 

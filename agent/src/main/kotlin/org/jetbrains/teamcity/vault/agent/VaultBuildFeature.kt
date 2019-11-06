@@ -69,15 +69,16 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
             // namespace is either empty string or something like 'id'
             val url = parameters[getVaultParameterName(namespace, VaultConstants.URL_PROPERTY_SUFFIX)]
             val wrapped = parameters[getVaultParameterName(namespace, VaultConstants.WRAPPED_TOKEN_PROPERTY_SUFFIX)]
-            val failOnError = parameters[getVaultParameterName(namespace, VaultConstants.FAIL_ON_ERROR_PROPERTY_SUFFIX)]
-                    ?.toBoolean() ?: false
+            val backoffPeriod = parameters[getVaultParameterName(namespace, VaultConstants.BACKOFF_PERIOD_PROPERTY_SUFFIX)]?.toLongOrNull() ?: 0L
+            val maxAttempts = parameters[getVaultParameterName(namespace, VaultConstants.MAX_ATTEMPTS_PERIOD_PROPERTY_SUFFIX)]?.toIntOrNull() ?: 1
+            val failOnError = parameters[getVaultParameterName(namespace, VaultConstants.FAIL_ON_ERROR_PROPERTY_SUFFIX)]?.toBoolean() ?: false
 
             if (url == null || url.isNullOrBlank()) {
                 return@forEach
             }
             val logger = runningBuild.buildLogger
             logger.activity("HashiCorp Vault" + if (isDefault(namespace)) "" else " ('$namespace' namespace)", VaultConstants.FeatureSettings.FEATURE_TYPE) {
-                val settings = VaultFeatureSettings(namespace, url, failOnError)
+                val settings = VaultFeatureSettings(namespace, url, backoffPeriod, maxAttempts, failOnError)
 
                 if (wrapped == null || wrapped.isNullOrEmpty()) {
                     logger.internalError(VaultConstants.FeatureSettings.FEATURE_TYPE, "Wrapped HashiCorp Vault token for url $url not found", null)

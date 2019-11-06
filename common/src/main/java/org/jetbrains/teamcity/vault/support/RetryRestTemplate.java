@@ -40,8 +40,7 @@ public class RetryRestTemplate extends RestTemplate {
     public <T> T execute(final String url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor, final Map<String, ?> urlVariables) throws RestClientException {
 
-        RetryTemplate retryTemplate = getRetryTemplate();
-        return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
+        return this.retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
                 return RetryRestTemplate.super.execute(url, method, requestCallback, responseExtractor, urlVariables);
@@ -53,8 +52,7 @@ public class RetryRestTemplate extends RestTemplate {
     public <T> T execute(final URI url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor) throws RestClientException {
 
-        RetryTemplate retryTemplate = getRetryTemplate();
-        return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
+        return this.retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
                 return RetryRestTemplate.super.execute(url, method, requestCallback, responseExtractor);
@@ -66,8 +64,7 @@ public class RetryRestTemplate extends RestTemplate {
     public <T> T execute(final String url, final HttpMethod method, final RequestCallback requestCallback,
                          final ResponseExtractor<T> responseExtractor, final Object... urlVariables) throws RestClientException {
 
-        RetryTemplate retryTemplate = getRetryTemplate();
-        return retryTemplate.execute(new RetryCallback<T, RestClientException>() {
+        return this.retryTemplate.execute(new RetryCallback<T, RestClientException>() {
             @Override
             public T doWithRetry(RetryContext context) throws RestClientException {
                 return RetryRestTemplate.super.execute(url, method, requestCallback, responseExtractor, urlVariables);
@@ -77,9 +74,5 @@ public class RetryRestTemplate extends RestTemplate {
 
     public void setRetryTemplate(RetryTemplate retryTemplate) {
         this.retryTemplate = retryTemplate;
-    }
-
-    private RetryTemplate getRetryTemplate() {
-        return this.retryTemplate;
     }
 }

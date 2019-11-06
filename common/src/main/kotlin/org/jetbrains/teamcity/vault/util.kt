@@ -67,8 +67,7 @@ fun createRetryRestTemplate(settings: VaultFeatureSettings, trustStoreProvider: 
     val factory = createClientHttpRequestFactory(trustStoreProvider)
     // HttpComponents.usingHttpComponents(options, sslConfiguration)
 
-    // TODO: get backoff and attempts from settings
-    val retry = createRetryTemplate(backoff = 1000L, attempts = 5)
+    val retry = createRetryTemplate(settings.backoffPeriod, settings.maxAttempts)
     val template = createRetryRestTemplate(endpoint, factory)
     template.setRetryTemplate(retry)
     return template
@@ -102,15 +101,15 @@ private fun createRetryRestTemplate(): RetryRestTemplate {
     return RetryRestTemplate(converters)
 }
 
-private fun createRetryTemplate(backoff: Long, attempts: Int): RetryTemplate {
+private fun createRetryTemplate(backoffPeriod: Long, maxAttempts: Int): RetryTemplate {
     val template = RetryTemplate()
 
     val backoffPolicy = FixedBackOffPolicy()
-    backoffPolicy.backOffPeriod = backoff
+    backoffPolicy.backOffPeriod = backoffPeriod
     template.setBackOffPolicy(backoffPolicy)
 
     val retryPolicy = SimpleRetryPolicy()
-    retryPolicy.maxAttempts = attempts
+    retryPolicy.maxAttempts = maxAttempts
     template.setRetryPolicy(retryPolicy)
 
     return template
