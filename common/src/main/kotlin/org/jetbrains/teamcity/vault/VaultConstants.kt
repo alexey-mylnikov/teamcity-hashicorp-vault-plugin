@@ -54,10 +54,10 @@ object VaultConstants {
         @JvmField val FAIL_ON_ERROR = "fail-on-error"
 
         @JvmField val BACKOFF_PERIOD = "backoff-period"
-        @JvmField val DEFAULT_BACKOFF_PERIOD = 1000L
+        @JvmField val DEFAULT_BACKOFF_PERIOD = 1500L
 
         @JvmField val MAX_ATTEMPTS = "max-attempts"
-        @JvmField val DEFAULT_MAX_ATTEMPTS = 1
+        @JvmField val DEFAULT_MAX_ATTEMPTS = 3
 
         @JvmField val AGENT_SUPPORT_REQUIREMENT = "teamcity.vault.requirement"
         @JvmField val AGENT_SUPPORT_REQUIREMENT_VALUE = "%$FEATURE_SUPPORTED_AGENT_PARAMETER%"
