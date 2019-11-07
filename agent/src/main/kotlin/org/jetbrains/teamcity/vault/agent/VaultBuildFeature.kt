@@ -69,8 +69,8 @@ class VaultBuildFeature(dispatcher: EventDispatcher<AgentLifeCycleListener>,
             // namespace is either empty string or something like 'id'
             val url = parameters[getVaultParameterName(namespace, VaultConstants.URL_PROPERTY_SUFFIX)]
             val wrapped = parameters[getVaultParameterName(namespace, VaultConstants.WRAPPED_TOKEN_PROPERTY_SUFFIX)]
-            val backoffPeriod = parameters[getVaultParameterName(namespace, VaultConstants.BACKOFF_PERIOD_PROPERTY_SUFFIX)]?.toLongOrNull() ?: 1500L
-            val maxAttempts = parameters[getVaultParameterName(namespace, VaultConstants.MAX_ATTEMPTS_PERIOD_PROPERTY_SUFFIX)]?.toIntOrNull() ?: 3
+            val maxAttempts = parameters[getVaultParameterName(namespace, VaultConstants.MAX_ATTEMPTS_PERIOD_PROPERTY_SUFFIX)]?.toIntOrNull() ?: VaultConstants.FeatureSettings.DEFAULT_MAX_ATTEMPTS
+            val backoffPeriod = parameters[getVaultParameterName(namespace, VaultConstants.BACKOFF_PERIOD_PROPERTY_SUFFIX)]?.toLongOrNull() ?: VaultConstants.FeatureSettings.DEFAULT_BACKOFF_PERIOD
             val failOnError = parameters[getVaultParameterName(namespace, VaultConstants.FAIL_ON_ERROR_PROPERTY_SUFFIX)]?.toBoolean() ?: false
 
             if (url == null || url.isNullOrBlank()) {
