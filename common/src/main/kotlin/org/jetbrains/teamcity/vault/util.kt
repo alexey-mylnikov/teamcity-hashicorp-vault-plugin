@@ -21,7 +21,6 @@ import jetbrains.buildServer.util.VersionComparatorUtil
 import jetbrains.buildServer.util.ssl.SSLTrustStoreProvider
 import org.jetbrains.teamcity.vault.support.ClientHttpRequestFactoryFactory
 import org.jetbrains.teamcity.vault.support.MappingJackson2HttpMessageConverter
-import org.jetbrains.teamcity.vault.support.RetryRestListener
 import org.jetbrains.teamcity.vault.support.RetryRestTemplate
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -29,7 +28,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.retry.backoff.FixedBackOffPolicy
-import org.springframework.retry.listener.RetryListenerSupport
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.vault.client.VaultClients
@@ -71,7 +69,7 @@ fun createRetryRestTemplate(settings: VaultFeatureSettings, trustStoreProvider: 
     val factory = createClientHttpRequestFactory(trustStoreProvider)
     // HttpComponents.usingHttpComponents(options, sslConfiguration)
 
-    val retry = createRetryTemplate(settings.backoffPeriod, settings.maxAttempts, RetryRestListener())
+    val retry = createRetryTemplate(settings.backoffPeriod, settings.maxAttempts)
     val template = createRetryRestTemplate(endpoint, factory)
     template.setRetryTemplate(retry)
     return template
@@ -105,7 +103,7 @@ private fun createRetryRestTemplate(): RetryRestTemplate {
     return RetryRestTemplate(converters)
 }
 
-private fun createRetryTemplate(backoffPeriod: Long, maxAttempts: Int, listener: RetryListenerSupport): RetryTemplate {
+private fun createRetryTemplate(backoffPeriod: Long, maxAttempts: Int): RetryTemplate {
     val template = RetryTemplate()
 
     val backoffPolicy = FixedBackOffPolicy()
@@ -115,8 +113,6 @@ private fun createRetryTemplate(backoffPeriod: Long, maxAttempts: Int, listener:
     val retryPolicy = SimpleRetryPolicy()
     retryPolicy.maxAttempts = maxAttempts
     template.setRetryPolicy(retryPolicy)
-
-    template.registerListener(listener)
 
     return template
 }
